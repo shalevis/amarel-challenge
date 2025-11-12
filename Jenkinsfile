@@ -25,6 +25,7 @@ pipeline {
         container('node') {
           sh '''
             echo "Installing dependencies..."
+            cd src
             npm install
             echo "Running tests..."
             npm test
