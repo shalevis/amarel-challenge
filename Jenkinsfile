@@ -20,8 +20,7 @@ pipeline {
   }
 
   stages {
-    // 🧪 Stage 1: Build and Test
-    stage('🏗️ Build & Test') {
+    stage('Build & Test') {
       steps {
         container('node') {
           sh '''
@@ -34,8 +33,7 @@ pipeline {
       }
     }
 
-    // 🔍 Stage 2: SonarQube Code Analysis
-    stage('🔎 SonarQube Scan') {
+    stage('SonarQube Scan') {
       steps {
         container('node') {
           withSonarQubeEnv('sonarqube') {
@@ -52,8 +50,7 @@ pipeline {
       }
     }
 
-    // 🐳 Stage 3: Build and Push Docker Image using Kaniko
-    stage('🐳 Build & Push Image') {
+    stage(' Build & Push Image') {
       steps {
         container('kaniko') {
           sh '''
@@ -69,14 +66,13 @@ pipeline {
       }
     }
 
-    // 🔐 Stage 4: Trivy Vulnerability Scan
-    stage('🔐 Trivy Vulnerability Scan') {
+    stage(' Trivy Vulnerability Scan') {
       steps {
         container('trivy') {
           sh '''
             echo "Running Trivy image scan..."
             trivy image --exit-code 1 --severity HIGH,CRITICAL ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} || {
-              echo "❌ High/Critical vulnerabilities found. Aborting pipeline."
+              echo " High/Critical vulnerabilities found. Aborting pipeline."
               exit 1
             }
           '''
@@ -84,8 +80,7 @@ pipeline {
       }
     }
 
-    // 🚀 Stage 5: Update GitOps Repository for ArgoCD
-    stage('🚀 Update GitOps Repo') {
+    stage(' Update GitOps Repo') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'gitops-https-creds-id', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
           container('jnlp') {
@@ -105,8 +100,7 @@ pipeline {
       }
     }
 
-    // 📦 Stage 6: ArgoCD Sync (Optional if Auto-Sync Enabled)
-    stage('📦 ArgoCD Sync') {
+    stage(' ArgoCD Sync') {
       steps {
         container('argocd') {
           sh '''
@@ -114,7 +108,7 @@ pipeline {
             argocd login ${ARGOCD_SERVER} --insecure --auth-token=${ARGOCD_TOKEN}
             argocd app sync ${ARGOCD_APP} --grpc-web
             argocd app wait ${ARGOCD_APP} --sync --health
-            echo "✅ ArgoCD sync completed successfully!"
+            echo " ArgoCD sync completed successfully!"
           '''
         }
       }
@@ -123,10 +117,10 @@ pipeline {
 
   post {
     success {
-      echo "✅ Pipeline completed successfully!"
+      echo " Pipeline completed successfully!"
     }
     failure {
-      echo "❌ Pipeline failed — please check logs!"
+      echo " Pipeline failed — please check logs!"
     }
     always {
       echo "Pipeline finished at $(date)"
