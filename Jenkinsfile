@@ -7,16 +7,13 @@ pipeline {
   }
 
   environment {
-    // 🔑 Credentials and endpoints
+
     DOCKER_CREDS = credentials('dockerhub-credentials-id')
     SONAR_TOKEN = credentials('sonarqube-token')
     GITOPS_CREDS = credentials('github-token')
-    ARGOCD_TOKEN = credentials('argocd-token') // optional if using auto-sync
-
-    // 🌐 Repositories and URLs
-    REGISTRY = "docker.io/yourdockerhubuser"
+    REGISTRY = "docker.io/shalevi55344"
     IMAGE_NAME = "myapp"
-    GITOPS_REPO = "https://github.com/youruser/myapp-gitops.git"
+    GITOPS_REPO = "https://github.com/shalevis/amarel-challenge.git"
     SONARQUBE_URL = "https://sonarqube.devops.local"
     ARGOCD_SERVER = "https://argocd.devops.local"
     ARGOCD_APP = "myapp"
