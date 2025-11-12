@@ -123,7 +123,7 @@ pipeline {
       echo " Pipeline failed — please check logs!"
     }
     always {
-      echo "Pipeline finished at $(date)"
+      echo "Pipeline finished at "
     }
   }
 }
