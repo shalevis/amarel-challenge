@@ -1,27 +1,138 @@
 pipeline {
-    agent {
-        kubernetes {
-            label 'nodejs-kaniko'        // The pod template label you set
-            defaultContainer 'jnlp'      // Container name in pod template
+  agent {
+    kubernetes {
+      label 'nodejs-kaniko'
+      defaultContainer 'jnlp'
+    }
+  }
+
+  environment {
+    // 🔑 Credentials and endpoints
+    DOCKER_CREDS = credentials('dockerhub-credentials-id')
+    SONAR_TOKEN = credentials('sonarqube-token')
+    GITOPS_CREDS = credentials('github-token')
+    ARGOCD_TOKEN = credentials('argocd-token') // optional if using auto-sync
+
+    // 🌐 Repositories and URLs
+    REGISTRY = "docker.io/yourdockerhubuser"
+    IMAGE_NAME = "myapp"
+    GITOPS_REPO = "https://github.com/youruser/myapp-gitops.git"
+    SONARQUBE_URL = "https://sonarqube.devops.local"
+    ARGOCD_SERVER = "https://argocd.devops.local"
+    ARGOCD_APP = "myapp"
+  }
+
+  stages {
+    // 🧪 Stage 1: Build and Test
+    stage('🏗️ Build & Test') {
+      steps {
+        container('node') {
+          sh '''
+            echo "Installing dependencies..."
+            npm install
+            echo "Running tests..."
+            npm test
+          '''
         }
+      }
     }
 
-    stages {
-        stage('Test Environment') {
-            steps {
-                container('jnlp') {      // Container in pod
-                    echo 'Running on Kubernetes agent!'
-                    sh 'echo "Hello from Kubernetes Agent!"'
-                    sh 'uname -a'
-                    sh 'whoami'
-                }
+    // 🔍 Stage 2: SonarQube Code Analysis
+    stage('🔎 SonarQube Scan') {
+      steps {
+        container('node') {
+          withSonarQubeEnv('sonarqube') {
+            sh '''
+              echo "Running SonarQube analysis..."
+              sonar-scanner \
+                -Dsonar.projectKey=myapp \
+                -Dsonar.sources=. \
+                -Dsonar.host.url=${SONARQUBE_URL} \
+                -Dsonar.login=${SONAR_TOKEN}
+            '''
+          }
+        }
+      }
+    }
+
+    // 🐳 Stage 3: Build and Push Docker Image using Kaniko
+    stage('🐳 Build & Push Image') {
+      steps {
+        container('kaniko') {
+          sh '''
+            echo "Building and pushing image with Kaniko..."
+            /kaniko/executor \
+              --context ${WORKSPACE} \
+              --dockerfile ${WORKSPACE}/Dockerfile \
+              --destination ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} \
+              --destination ${REGISTRY}/${IMAGE_NAME}:latest \
+              --cache=true
+          '''
+        }
+      }
+    }
+
+    // 🔐 Stage 4: Trivy Vulnerability Scan
+    stage('🔐 Trivy Vulnerability Scan') {
+      steps {
+        container('trivy') {
+          sh '''
+            echo "Running Trivy image scan..."
+            trivy image --exit-code 1 --severity HIGH,CRITICAL ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} || {
+              echo "❌ High/Critical vulnerabilities found. Aborting pipeline."
+              exit 1
             }
+          '''
         }
+      }
     }
 
-    post {
-        always {
-            echo 'Pipeline finished.'
+    // 🚀 Stage 5: Update GitOps Repository for ArgoCD
+    stage('🚀 Update GitOps Repo') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'gitops-https-creds-id', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+          container('jnlp') {
+            sh '''
+              echo "Updating GitOps repo with new image tag..."
+              git clone https://${GIT_USER}:${GIT_PASS}@github.com/youruser/myapp-gitops.git gitops
+              cd gitops
+              yq e -i '.image.tag = "${BUILD_NUMBER}"' helm/values.yaml
+              git config user.email "jenkins@ci.local"
+              git config user.name "Jenkins CI"
+              git add .
+              git commit -m "Update image tag to ${BUILD_NUMBER}"
+              git push origin main
+            '''
+          }
         }
+      }
     }
+
+    // 📦 Stage 6: ArgoCD Sync (Optional if Auto-Sync Enabled)
+    stage('📦 ArgoCD Sync') {
+      steps {
+        container('argocd') {
+          sh '''
+            echo "Triggering ArgoCD sync for app ${ARGOCD_APP}..."
+            argocd login ${ARGOCD_SERVER} --insecure --auth-token=${ARGOCD_TOKEN}
+            argocd app sync ${ARGOCD_APP} --grpc-web
+            argocd app wait ${ARGOCD_APP} --sync --health
+            echo "✅ ArgoCD sync completed successfully!"
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "✅ Pipeline completed successfully!"
+    }
+    failure {
+      echo "❌ Pipeline failed — please check logs!"
+    }
+    always {
+      echo "Pipeline finished at $(date)"
+    }
+  }
 }
