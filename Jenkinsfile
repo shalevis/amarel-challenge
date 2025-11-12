@@ -27,7 +27,6 @@ pipeline {
             echo "Installing dependencies..."
             cd src
             npm install
-            echo "Running tests..."
           '''
         }
       }
@@ -35,7 +34,7 @@ pipeline {
 
     stage('SonarQube Scan') {
       steps {
-        container('node') {
+        container('sonar-scanner') {
           withSonarQubeEnv('sonarqube') {
             sh '''
               echo "Running SonarQube analysis..."
