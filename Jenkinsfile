@@ -14,7 +14,7 @@ pipeline {
     REGISTRY = "docker.io/shalevi55344"
     IMAGE_NAME = "myapp"
     GITOPS_REPO = "https://github.com/shalevis/amarel-challenge.git"
-    SONARQUBE_URL = "https://crimson-wolf-15259.zap.cloud/sonarqube"
+    SONARQUBE_URL = "http://crimson-wolf-15259.zap.cloud/sonarqube"
     ARGOCD_SERVER = "https://argocd.devops.local"
     ARGOCD_APP = "myapp"
   }
