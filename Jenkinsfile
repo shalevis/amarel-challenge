@@ -9,7 +9,7 @@ pipeline {
   environment {
 
     DOCKER_CREDS = credentials('dockerhub-credentials-id')
-    SONAR_TOKEN = credentials('sonarqube-token')
+    SONAR_TOKEN = credentials('sonar-token')
     GITOPS_CREDS = credentials('github-token')
     REGISTRY = "docker.io/shalevi55344"
     IMAGE_NAME = "myapp"
