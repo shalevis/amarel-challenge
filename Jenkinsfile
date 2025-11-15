@@ -32,23 +32,6 @@ pipeline {
       }
     }
 
-    stage('SonarQube Scan') {
-      steps {
-        container('sonar-scanner') {
-          withSonarQubeEnv('sonarqube') {
-            sh '''
-              echo "Running SonarQube analysis..."
-              sonar-scanner \
-                -Dsonar.projectKey=myapp \
-                -Dsonar.sources=. \
-                -Dsonar.host.url=${SONARQUBE_URL} \
-                -Dsonar.login=${SONAR_TOKEN}
-            '''
-          }
-        }
-      }
-    }
-
     stage(' Build & Push Image') {
       steps {
         container('kaniko') {
