@@ -94,7 +94,7 @@ EOF
             sh '''
               echo "Updating GitOps repo with new image tag..."
               git clone https://github.com/shalevis/amarel-challenge-gitops.git 
-              cd amarel-challenge-gitops/helm/amarel-challenge-gitops
+              cd amarel-challenge-gitops/helm/amarel-challenge
               yq e -i '.image.tag = "${BUILD_NUMBER}"' values.yaml
               git config user.email "jenkins@ci.local"
               git config user.name "Jenkins CI"
