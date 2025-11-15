@@ -12,11 +12,10 @@ pipeline {
     SONAR_TOKEN = credentials('sonar-token')
     GITOPS_CREDS = credentials('github-token')
     REGISTRY = "docker.io/shalevi55344"
-    IMAGE_NAME = "myapp"
+    IMAGE_NAME = "amarel-challenge"
     GITOPS_REPO = "https://github.com/shalevis/amarel-challenge.git"
-    SONARQUBE_URL = "http://crimson-wolf-15259.zap.cloud/sonarqube"
     ARGOCD_SERVER = "https://argocd.devops.local"
-    ARGOCD_APP = "myapp"
+    ARGOCD_APP = "amarel-challenge"
   }
 
   stages {
