@@ -87,24 +87,38 @@ EOF
       }
     }
 
-    stage(' Update GitOps Repo') {
-      steps {
-          container('jnlp') {
-            sh '''
-              echo "Updating GitOps repo with new image tag..."
-              git clone https://github.com/shalevis/amarel-challenge-gitops.git 
-              cd amarel-challenge-gitops/helm/amarel-challenge
-              sed -i 's/^  tag:.*/  tag: "'${BUILD_NUMBER}'"/' values.yaml
-              git config user.email "jenkins@ci.local"
-              git config user.name "Jenkins CI"
-              git add .
-              git commit -m "Update image tag to ${BUILD_NUMBER}"
-              git push origin main
-            '''
-          }
-        
+  stage('Update GitOps Repo') {
+  steps {
+    container('jnlp') {
+      withCredentials([
+        usernamePassword(
+          credentialsId: 'shalevis',
+          usernameVariable: 'GIT_USER',
+          passwordVariable: 'GIT_PASS'
+        )
+      ]) {
+        sh '''
+          echo "Cloning GitOps repo..."
+          git clone https://${GIT_USER}:${GIT_PASS}@github.com/shalevis/amarel-challenge-gitops.git gitops
+
+          cd gitops/helm/amarel-challenge
+
+          echo "Updating image tag using sed..."
+          sed -i 's/^  tag:.*/  tag: "'${BUILD_NUMBER}'"/' values.yaml
+
+          git config user.email "jenkins@ci.local"
+          git config user.name "Jenkins CI"
+
+          git add .
+          git commit -m "Update image tag to ${BUILD_NUMBER}"
+
+          echo "Pushing changes..."
+          git push https://${GIT_USER}:${GIT_PASS}@github.com/shalevis/amarel-challenge-gitops.git main
+        '''
       }
     }
+  }
+}
 
     stage(' ArgoCD Sync') {
       steps {
