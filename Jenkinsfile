@@ -89,7 +89,7 @@ EOF
 
     stage(' Update GitOps Repo') {
       steps {
-          container('jnlp') {
+          container('yq') {
             sh '''
               echo "Updating GitOps repo with new image tag..."
               git clone https://github.com/shalevis/amarel-challenge-gitops.git 
