@@ -92,7 +92,7 @@ EOF
     container('jnlp') {
       withCredentials([
         usernamePassword(
-          credentialsId: 'gitops-https-creds',
+          credentialsId: 'shalevis-github',
           usernameVariable: 'GIT_USER',
           passwordVariable: 'GIT_PASS'
         )
