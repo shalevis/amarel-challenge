@@ -35,7 +35,7 @@ pipeline {
      steps {
       container('kaniko') {
         withCredentials([usernamePassword(
-          credentialsId: 'docker-hub-creds',
+          credentialsId: 'dockerhub-credentials-id',
           usernameVariable: 'DOCKER_USER',
           passwordVariable: 'DOCKER_PASS'
         )]) {
