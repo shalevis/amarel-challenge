@@ -34,6 +34,9 @@ pipeline {
     stage(' Build & Push Image') {
       steps {
         container('kaniko') {
+          sh 'ls -l /kaniko/.docker'
+          sh 'cat /kaniko/.docker/config.json'
+
           sh '''
             echo "Building and pushing image with Kaniko..."
             /kaniko/executor \
