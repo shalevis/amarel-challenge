@@ -31,24 +31,45 @@ pipeline {
       }
     }
 
-    stage(' Build & Push Image') {
-      steps {
-        container('kaniko') {
-          sh 'ls -l /kaniko/.docker'
-          sh 'cat /kaniko/.docker/config.json'
+    stage('Build & Push Image') {
+     steps {
+      container('kaniko') {
+        withCredentials([usernamePassword(
+          credentialsId: 'docker-hub-creds',
+          usernameVariable: 'DOCKER_USER',
+          passwordVariable: 'DOCKER_PASS'
+        )]) {
 
-          sh '''
-            echo "Building and pushing image with Kaniko..."
-            /kaniko/executor \
-              --context ${WORKSPACE} \
-              --dockerfile ${WORKSPACE}/Dockerfile \
-              --destination ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} \
-              --destination ${REGISTRY}/${IMAGE_NAME}:latest \
-              --cache=true
-          '''
-        }
+        sh '''
+          echo "Creating Docker config.json for Kaniko..."
+
+          mkdir -p /kaniko/.docker
+
+          cat > /kaniko/.docker/config.json <<EOF
+{
+  "auths": {
+    "https://index.docker.io/v1/": {
+      "auth": "$(echo -n "$DOCKER_USER:$DOCKER_PASS" | base64)"
+    }
+  }
+}
+EOF
+
+          echo "Config created:"
+          cat /kaniko/.docker/config.json
+
+          echo "Running Kaniko..."
+          /kaniko/executor \
+            --context $WORKSPACE \
+            --dockerfile $WORKSPACE/Dockerfile \
+            --destination docker.io/$DOCKER_USER/amarel-challenge:$BUILD_NUMBER \
+            --destination docker.io/$DOCKER_USER/amarel-challenge:latest \
+            --cache=true
+        '''
       }
     }
+  }
+}
 
     stage(' Trivy Vulnerability Scan') {
       steps {
