@@ -89,7 +89,6 @@ EOF
 
     stage(' Update GitOps Repo') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'gitops-https-creds-id', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
           container('jnlp') {
             sh '''
               echo "Updating GitOps repo with new image tag..."
@@ -103,7 +102,7 @@ EOF
               git push origin main
             '''
           }
-        }
+        
       }
     }
 
