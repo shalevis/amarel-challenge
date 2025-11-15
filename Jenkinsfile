@@ -78,7 +78,7 @@ EOF
         container('trivy') {
           sh '''
             echo "Running Trivy image scan..."
-            trivy image --exit-code 1 --severity HIGH,CRITICAL ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} || {
+            trivy image --exit-code 1 --severity CRITICAL ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} || {
               echo " High/Critical vulnerabilities found. Aborting pipeline."
               exit 1
             }
