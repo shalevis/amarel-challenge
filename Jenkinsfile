@@ -26,6 +26,8 @@ pipeline {
             echo "Installing dependencies..."
             cd src
             npm install
+            npm ls cross-spawn
+            npm ls cross-spawn --all
           '''
         }
       }
