@@ -93,9 +93,9 @@ EOF
           container('jnlp') {
             sh '''
               echo "Updating GitOps repo with new image tag..."
-              git clone https://${GIT_USER}:${GIT_PASS}@github.com/youruser/myapp-gitops.git gitops
-              cd gitops
-              yq e -i '.image.tag = "${BUILD_NUMBER}"' helm/values.yaml
+              git clone https://github.com/shalevis/amarel-challenge-gitops.git 
+              cd amarel-challenge-gitops/helm/amarel-challenge-gitops
+              yq e -i '.image.tag = "${BUILD_NUMBER}"' values.yaml
               git config user.email "jenkins@ci.local"
               git config user.name "Jenkins CI"
               git add .
