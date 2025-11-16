@@ -10,7 +10,7 @@ pipeline {
 
     DOCKER_CREDS = credentials('dockerhub-credentials-id')
     SONAR_TOKEN = credentials('sonar-token')
-    GITOPS_CREDS = credentials('shalevis')
+    GITOPS_CREDS = credentials('gitops-https-creds')
     REGISTRY = "docker.io/shalevi55344"
     IMAGE_NAME = "amarel-challenge"
     GITOPS_REPO = "https://github.com/shalevis/amarel-challenge.git"
@@ -93,7 +93,7 @@ EOF
     container('jnlp') {
       withCredentials([
         usernamePassword(
-          credentialsId: 'shalevis-github',
+          credentialsId: 'gitops-https-creds',
           usernameVariable: 'GIT_USER',
           passwordVariable: 'GIT_PASS'
         )
