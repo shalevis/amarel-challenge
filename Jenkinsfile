@@ -88,7 +88,7 @@ EOF
       }
     }
 
-  stage('Update GitOps Repo') {
+stage('Update GitOps Repo') {
   steps {
     container('jnlp') {
       withCredentials([
@@ -120,13 +120,20 @@ EOF
     }
   }
 }
+post {
+    always {
+      echo "Pipeline finished. Cleaning up..."
+      sh 'rm -rf gitops || true'
+    }
 
-stage('Wait for Deployment') {
-  steps {
-    container('kubectl') {
-      sh 'kubectl rollout status deployment/amarel-challenge -n devops-tools --timeout=120s'
+    success {
+      echo "Pipeline completed successfully! 🎉"
+      echo "ArgoCD auto-sync will deploy the new image automatically."
+    }
+
+    failure {
+      echo "Pipeline failed. ❌"
     }
   }
-}
   }
 }
