@@ -127,24 +127,16 @@ EOF
           sh '''
             echo "Triggering ArgoCD sync for app ${ARGOCD_APP}..."
             argocd login ${ARGOCD_SERVER} --insecure --auth-token=${ARGOCD_TOKEN}
+            echo " ArgoCD sync completed successfully!"
+
             argocd app sync ${ARGOCD_APP} --grpc-web
+            echo " ArgoCD sync completed successfully!"
+
             argocd app get ${ARGOCD_APP} --grpc-web
             echo " ArgoCD sync completed successfully!"
           '''
         }
       }
-    }
-  }
-
-  post {
-    success {
-      echo " Pipeline completed successfully!"
-    }
-    failure {
-      echo " Pipeline failed — please check logs!"
-    }
-    always {
-      echo "Pipeline finished at "
     }
   }
 }

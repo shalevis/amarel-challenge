@@ -88,25 +88,16 @@ app.get('/my-app', (req, res) => {const hostname = process.env.HOSTNAME || "unkn
             <div class="section">
                 <h2>📌 Kubernetes Info</h2>
                 <p><span class="label">Pod:</span> <span class="value">${hostname}</span></p>
-                <p><span class="label">Namespace:</span> <span class="value">${namespace}</span></p>
-                <p><span class="label">Node:</span> <span class="value">${node}</span></p>
+                <p><span class="label">Namespace:</span> <span class="value">amarel-challenge</span></p>
             </div>
 
             <div class="section">
                 <h2>📡 API Endpoints</h2>
-                <p><a href="/my-app" style="color:#58a6ff;">/my-app</a> — System JSON Overview</p>
-                <p><a href="/ready" style="color:#58a6ff;">/ready</a> — Readiness Probe</p>
-                <p><a href="/live" style="color:#58a6ff;">/live</a> — Liveness Probe</p>
-                <p><a href="/metrics" style="color:#58a6ff;">/metrics</a> — Prometheus Metrics</p>
+                <p><a href="amarel-challenge/my-app" style="color:#58a6ff;">/my-app</a> — System JSON Overview</p>
+                <p><a href="amarel-challenge/ready" style="color:#58a6ff;">/ready</a> — Readiness Probe</p>
+                <p><a href="amarel-challenge/live" style="color:#58a6ff;">/live</a> — Liveness Probe</p>
+                <p><a href="amarel-challenge/metrics" style="color:#58a6ff;">/metrics</a> — Prometheus Metrics</p>
             </div>
-
-            <div class="section">
-                <h2>😎 Fun Fact</h2>
-                <p style="font-size:1.2em; color:#9cdcfe;">
-                    “Deploy. Scale. Conquer. Kubernetes style.”
-                </p>
-            </div>
-
             <div class="footer">
                 Built with ❤️ for the Amarel Challenge
             </div>
