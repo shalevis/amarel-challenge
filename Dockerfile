@@ -7,6 +7,7 @@ COPY src/* ./
 RUN npm install --omit=dev
 
 EXPOSE 8080
+USER appuser
 
 ENV PORT=8080
 
