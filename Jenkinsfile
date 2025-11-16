@@ -121,13 +121,10 @@ EOF
   }
 }
 
-stage('Check App Health') {
+stage('Wait for Deployment') {
   steps {
-    container('jnlp') {
-      sh '''
-        kubectl rollout status deployment/${IMAGE_NAME} -n devops-tools --timeout=120s
-        echo "App is healthy and up-to-date"
-      '''
+    container('kubectl') {
+      sh 'kubectl rollout status deployment/amarel-challenge -n devops-tools --timeout=120s'
     }
   }
 }
