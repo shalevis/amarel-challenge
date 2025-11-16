@@ -121,24 +121,15 @@ EOF
   }
 }
 
-stage('Wait for ArgoCD Sync') {
+stage('Check App Health') {
   steps {
-    container('argocd') {
-      sh """
-        echo "Checking ArgoCD app status for ${ARGOCD_APP}..."
-        argocd login ${ARGOCD_SERVER} --insecure --auth-token=${ARGOCD_TOKEN}
-
-        # Wait until app is healthy and synced (timeout after 2 minutes)
-        argocd app wait ${ARGOCD_APP} --health --timeout 120
-
-        # Show final status
-        argocd app get ${ARGOCD_APP} --show-operation
-      """
+    container('jnlp') {
+      sh '''
+        kubectl rollout status deployment/${IMAGE_NAME} -n devops-tools --timeout=120s
+        echo "App is healthy and up-to-date"
+      '''
     }
   }
 }
-        
-      }
-    }
   }
 }
