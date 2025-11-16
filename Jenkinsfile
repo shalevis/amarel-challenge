@@ -123,7 +123,7 @@ EOF
 
     stage(' ArgoCD Sync') {
       steps {
-        container('argocd') {
+      
           container('argocd') {
             sh '#!/bin/sh'
             sh 'echo "Logging in..."'
@@ -134,7 +134,7 @@ EOF
             sh 'argocd app get ${ARGOCD_APP} --grpc-web'
 }
 
-        }
+        
       }
     }
   }
