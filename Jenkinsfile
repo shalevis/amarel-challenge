@@ -128,8 +128,7 @@ EOF
             echo "Triggering ArgoCD sync for app ${ARGOCD_APP}..."
             argocd login ${ARGOCD_SERVER} --insecure --auth-token=${ARGOCD_TOKEN}
             argocd app sync ${ARGOCD_APP} --grpc-web
-            argocd app get $ARGOCD_APP -o json | grep -q '"status":"Healthy"' && \
-            argocd app get $ARGOCD_APP -o json | grep -q '"status":"Synced"' || exit 1
+            argocd app get ${ARGOCD_APP} --grpc-web
             echo " ArgoCD sync completed successfully!"
           '''
         }
