@@ -7,16 +7,12 @@ pipeline {
   }
 
   environment {
-
     DOCKER_CREDS = credentials('dockerhub-credentials-id')
     SONAR_TOKEN = credentials('sonar-token')
     GITOPS_CREDS = credentials('gitops-https-creds')
     REGISTRY = "docker.io/shalevi55344"
     IMAGE_NAME = "amarel-challenge"
     GITOPS_REPO = "https://github.com/shalevis/amarel-challenge.git"
-    ARGOCD_SERVER = "https://crimson-wolf-15259.zap.cloud/argocd"
-    ARGOCD_TOKEN = credentials('ARGOCD_TOKEN')
-    ARGOCD_APP = "amarel-challenge"
   }
 
   stages {
@@ -35,20 +31,17 @@ pipeline {
     }
 
     stage('Build & Push Image') {
-     steps {
-      container('kaniko') {
-        withCredentials([usernamePassword(
-          credentialsId: 'dockerhub-credentials-id',
-          usernameVariable: 'DOCKER_USER',
-          passwordVariable: 'DOCKER_PASS'
-        )]) {
-
-        sh '''
-          echo "Creating Docker config.json for Kaniko..."
-
-          mkdir -p /kaniko/.docker
-
-          cat > /kaniko/.docker/config.json <<EOF
+      steps {
+        container('kaniko') {
+          withCredentials([usernamePassword(
+            credentialsId: 'dockerhub-credentials-id',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS'
+          )]) {
+            sh '''
+              echo "Creating Docker config.json for Kaniko..."
+              mkdir -p /kaniko/.docker
+              cat > /kaniko/.docker/config.json <<EOF
 {
   "auths": {
     "https://index.docker.io/v1/": {
@@ -57,30 +50,26 @@ pipeline {
   }
 }
 EOF
-
-          echo "Config created:"
-          cat /kaniko/.docker/config.json
-
-          echo "Running Kaniko..."
-          /kaniko/executor \
-            --context $WORKSPACE \
-            --dockerfile $WORKSPACE/Dockerfile \
-            --destination docker.io/$DOCKER_USER/amarel-challenge:$BUILD_NUMBER \
-            --destination docker.io/$DOCKER_USER/amarel-challenge:latest \
-            --cache=true
-        '''
+              echo "Running Kaniko..."
+              /kaniko/executor \
+                --context $WORKSPACE \
+                --dockerfile $WORKSPACE/Dockerfile \
+                --destination docker.io/$DOCKER_USER/amarel-challenge:$BUILD_NUMBER \
+                --destination docker.io/$DOCKER_USER/amarel-challenge:latest \
+                --cache=true
+            '''
+          }
+        }
       }
     }
-  }
-}
 
-    stage(' Trivy Vulnerability Scan') {
+    stage('Trivy Vulnerability Scan') {
       steps {
         container('trivy') {
           sh '''
             echo "Running Trivy image scan..."
             trivy image --exit-code 1 --severity CRITICAL ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} || {
-              echo " High/Critical vulnerabilities found. Aborting pipeline."
+              echo "High/Critical vulnerabilities found. Aborting pipeline."
               exit 1
             }
           '''
@@ -88,39 +77,36 @@ EOF
       }
     }
 
-stage('Update GitOps Repo') {
-  steps {
-    container('jnlp') {
-      withCredentials([
-        usernamePassword(
-          credentialsId: 'gitops-https-creds',
-          usernameVariable: 'GIT_USER',
-          passwordVariable: 'GIT_PASS'
-        )
-      ]) {
-        sh '''
-          echo "Cloning GitOps repo..."
-          git clone https://${GIT_USER}:${GIT_PASS}@github.com/shalevis/amarel-challenge-gitops.git gitops
-
-          cd gitops/helm/amarel-challenge
-
-          echo "Updating image tag using sed..."
-          sed -i 's/^  tag:.*/  tag: "'${BUILD_NUMBER}'"/' values.yaml
-
-          git config user.email "jenkins@ci.local"
-          git config user.name "Jenkins CI"
-
-          git add .
-          git commit -m "Update image tag to ${BUILD_NUMBER}"
-
-          echo "Pushing changes..."
-          git push https://${GIT_USER}:${GIT_PASS}@github.com/shalevis/amarel-challenge-gitops.git main
-        '''
+    stage('Update GitOps Repo') {
+      steps {
+        container('jnlp') {
+          withCredentials([
+            usernamePassword(
+              credentialsId: 'gitops-https-creds',
+              usernameVariable: 'GIT_USER',
+              passwordVariable: 'GIT_PASS'
+            )
+          ]) {
+            sh '''
+              echo "Cloning GitOps repo..."
+              git clone https://${GIT_USER}:${GIT_PASS}@github.com/shalevis/amarel-challenge-gitops.git gitops
+              cd gitops/helm/amarel-challenge
+              echo "Updating image tag using sed..."
+              sed -i 's/^  tag:.*/  tag: "'${BUILD_NUMBER}'"/' values.yaml
+              git config user.email "jenkins@ci.local"
+              git config user.name "Jenkins CI"
+              git add .
+              git commit -m "Update image tag to ${BUILD_NUMBER}"
+              echo "Pushing changes..."
+              git push https://${GIT_USER}:${GIT_PASS}@github.com/shalevis/amarel-challenge-gitops.git main
+            '''
+          }
+        }
       }
     }
   }
-}
-post {
+
+  post {
     always {
       echo "Pipeline finished. Cleaning up..."
       sh 'rm -rf gitops || true'
@@ -134,6 +120,5 @@ post {
     failure {
       echo "Pipeline failed. ❌"
     }
-  }
   }
 }
