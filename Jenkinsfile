@@ -10,7 +10,7 @@ pipeline {
 
     DOCKER_CREDS = credentials('dockerhub-credentials-id')
     SONAR_TOKEN = credentials('sonar-token')
-    GITOPS_CREDS = credentials('shalevis-github')
+    GITOPS_CREDS = credentials('shalevis')
     REGISTRY = "docker.io/shalevi55344"
     IMAGE_NAME = "amarel-challenge"
     GITOPS_REPO = "https://github.com/shalevis/amarel-challenge.git"
