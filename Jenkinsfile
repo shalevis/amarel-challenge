@@ -121,19 +121,22 @@ EOF
   }
 }
 
-    stage(' ArgoCD Sync') {
-      steps {
-      
-          container('argocd') {
-            sh '#!/bin/sh'
-            sh 'echo "Logging in..."'
-            sh 'argocd login ${ARGOCD_SERVER} --insecure --auth-token=${ARGOCD_TOKEN}'
-            sh 'echo "Syncing app..."'
-            sh 'argocd app sync ${ARGOCD_APP} --grpc-web'
-            sh 'echo "Getting status..."'
-            sh 'argocd app get ${ARGOCD_APP} --grpc-web'
-}
+stage('Wait for ArgoCD Sync') {
+  steps {
+    container('argocd') {
+      sh """
+        echo "Checking ArgoCD app status for ${ARGOCD_APP}..."
+        argocd login ${ARGOCD_SERVER} --insecure --auth-token=${ARGOCD_TOKEN}
 
+        # Wait until app is healthy and synced (timeout after 2 minutes)
+        argocd app wait ${ARGOCD_APP} --health --timeout 120
+
+        # Show final status
+        argocd app get ${ARGOCD_APP} --show-operation
+      """
+    }
+  }
+}
         
       }
     }
