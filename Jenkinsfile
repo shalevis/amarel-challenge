@@ -14,7 +14,8 @@ pipeline {
     REGISTRY = "docker.io/shalevi55344"
     IMAGE_NAME = "amarel-challenge"
     GITOPS_REPO = "https://github.com/shalevis/amarel-challenge.git"
-    ARGOCD_SERVER = "https://argocd.devops.local"
+    ARGOCD_SERVER = "https://crimson-wolf-15259.zap.cloud/argocd"
+    ARGOCD_TOKEN = credentials('ARGOCD_TOKEN')
     ARGOCD_APP = "amarel-challenge"
   }
 
