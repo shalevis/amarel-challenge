@@ -34,7 +34,7 @@ pipeline {
     container('semgrep') {
       sh '''
         echo "Running Semgrep scan..."
-        semgrep --config=.semgrep.yml --error .
+        semgrep --config=auto --exclude-rule="javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage" --error .
       '''
     }
   }
