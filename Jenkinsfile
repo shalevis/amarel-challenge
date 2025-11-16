@@ -124,17 +124,16 @@ EOF
     stage(' ArgoCD Sync') {
       steps {
         container('argocd') {
-          sh '''
-            echo "Triggering ArgoCD sync for app ${ARGOCD_APP}..."
-            argocd login ${ARGOCD_SERVER} --insecure --auth-token=${ARGOCD_TOKEN}
-            echo " ArgoCD sync completed successfully!"
+          container('argocd') {
+            sh '#!/bin/sh'
+            sh 'echo "Logging in..."'
+            sh 'argocd login ${ARGOCD_SERVER} --insecure --auth-token=${ARGOCD_TOKEN}'
+            sh 'echo "Syncing app..."'
+            sh 'argocd app sync ${ARGOCD_APP} --grpc-web'
+            sh 'echo "Getting status..."'
+            sh 'argocd app get ${ARGOCD_APP} --grpc-web'
+}
 
-            argocd app sync ${ARGOCD_APP} --grpc-web
-            echo " ArgoCD sync completed successfully!"
-
-            argocd app get ${ARGOCD_APP} --grpc-web
-            echo " ArgoCD sync completed successfully!"
-          '''
         }
       }
     }
