@@ -1,27 +1,26 @@
 const express = require('express');
 const promClient = require('prom-client');
-const path = require("path");
 
 const app = express();
 const port = process.env.PORT || 8080;
 
-// Create a Registry to register the metrics
+// Prometheus registry
 const register = new promClient.Registry();
-
-// Enable the collection of default metrics
 promClient.collectDefaultMetrics({ register });
 
+// Counter example metric
 const helloWorldCounter = new promClient.Counter({
     name: 'root_access_total',
-    help: 'Total number of accesses to the root path',
+    help: 'Total number of accesses to the /my-app path',
 });
 register.registerMetric(helloWorldCounter);
 
+// MAIN UI ENDPOINT
+app.get('/my-app', (req, res) => {
+    helloWorldCounter.inc();
 
-
-// Define routes
-app.get('/my-app', (req, res) => {const hostname = process.env.HOSTNAME || "unknown";
-    const namespace = process.env.POD_NAMESPACE || "unknown";
+    const hostname = process.env.HOSTNAME || "unknown";
+    const namespace = process.env.POD_NAMESPACE || "amarel-challenge";
     const node = process.env.K8S_NODE_NAME || "unknown";
 
     const html = `
@@ -75,11 +74,11 @@ app.get('/my-app', (req, res) => {const hostname = process.env.HOSTNAME || "unkn
                 margin-top: 40px;
                 color: #565f67;
             }
+            a { color: #58a6ff; }
         </style>
     </head>
     <body>
         <div class="container">
-            
             <h1>🚀 Amarel Challenge Micro-Service</h1>
             <p style="text-align:center">
                 <span class="badge">ONLINE</span>
@@ -88,16 +87,18 @@ app.get('/my-app', (req, res) => {const hostname = process.env.HOSTNAME || "unkn
             <div class="section">
                 <h2>📌 Kubernetes Info</h2>
                 <p><span class="label">Pod:</span> <span class="value">${hostname}</span></p>
-                <p><span class="label">Namespace:</span> <span class="value">amarel-challenge</span></p>
+                <p><span class="label">Namespace:</span> <span class="value">${namespace}</span></p>
+                <p><span class="label">Node:</span> <span class="value">${node}</span></p>
             </div>
 
             <div class="section">
                 <h2>📡 API Endpoints</h2>
-                <p><a href="amarel-challenge/my-app" style="color:#58a6ff;">/my-app</a> — System JSON Overview</p>
-                <p><a href="amarel-challenge/ready" style="color:#58a6ff;">/ready</a> — Readiness Probe</p>
-                <p><a href="amarel-challenge/live" style="color:#58a6ff;">/live</a> — Liveness Probe</p>
-                <p><a href="amarel-challenge/metrics" style="color:#58a6ff;">/metrics</a> — Prometheus Metrics</p>
+                <p><a href="/my-app">/my-app</a> — UI Dashboard</p>
+                <p><a href="/ready">/ready</a> — Readiness Probe</p>
+                <p><a href="/live">/live</a> — Liveness Probe</p>
+                <p><a href="/metrics">/metrics</a> — Prometheus Metrics</p>
             </div>
+
             <div class="footer">
                 Built with ❤️ for the Amarel Challenge
             </div>
@@ -106,32 +107,24 @@ app.get('/my-app', (req, res) => {const hostname = process.env.HOSTNAME || "unkn
     </body>
     </html>
     `;
-
     res.send(html);
-    
 });
 
+// BASIC ROUTES
 app.get('/about', (req, res) => {
     res.send('This is a sample Node.js application for Kubernetes deployment testing.');
 });
 
-app.get('/ready', (req, res) => {
-    res.status(200).send('Ready');
-});
+app.get('/ready', (req, res) => res.status(200).send('Ready'));
+app.get('/live', (req, res) => res.status(200).send('Alive'));
 
-app.get('/live', (req, res) => {
-    res.status(200).send('Alive');
-});
-
-app.get('/classified', (req, res) => {
-    res.status(200).send('You should not be here!!!');
-});
-
+// PROMETHEUS METRICS
 app.get('/metrics', async (req, res) => {
     res.set('Content-Type', register.contentType);
     res.end(await register.metrics());
 });
 
+// START SERVER
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
