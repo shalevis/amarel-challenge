@@ -29,19 +29,16 @@ pipeline {
         }
       }
     }
-   stage('Semgrep Security Scan') {
-      steps {
-        container('semgrep') {
-          sh '''
-            echo "Running Semgrep scan..."
-            semgrep --config=auto src/ --error || {
-              echo "❌ Semgrep found security issues. Failing pipeline."
-              exit 1
-            }
-          '''
-        }
-      }
+   stage('Semgrep Scan') {
+  steps {
+    container('semgrep') {
+      sh '''
+        echo "Running Semgrep scan..."
+        semgrep --config=.semgrep.yml --error .
+      '''
     }
+  }
+}
     stage('Build & Push Image') {
       steps {
         container('kaniko') {
