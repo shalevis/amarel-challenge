@@ -93,10 +93,10 @@ app.get('/my-app', (req, res) => {
 
             <div class="section">
                 <h2>📡 API Endpoints</h2>
-                <p><a href="/my-app">/my-app</a> — UI Dashboard</p>
-                <p><a href="/ready">/ready</a> — Readiness Probe</p>
-                <p><a href="/live">/live</a> — Liveness Probe</p>
-                <p><a href="/metrics">/metrics</a> — Prometheus Metrics</p>
+                <p><a href="/amarel-challenge/my-app">/my-app</a> — UI Dashboard</p>
+                <p><a href="/amarel-challenge/ready">/ready</a> — Readiness Probe</p>
+                <p><a href="/amarel-challenge/live">/live</a> — Liveness Probe</p>
+                <p><a href="/amarel-challenge/metrics">/metrics</a> — Prometheus Metrics</p>
             </div>
 
             <div class="footer">
