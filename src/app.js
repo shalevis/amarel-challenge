@@ -79,7 +79,7 @@ app.get('/my-app', (req, res) => {
     </head>
     <body>
         <div class="container">
-            <h1>🚀 Amarel Challenge Micro-Service</h1>
+            <h1>🚀 Amarel Challenge</h1>
             <p style="text-align:center">
                 <span class="badge">ONLINE</span>
             </p>
@@ -88,7 +88,6 @@ app.get('/my-app', (req, res) => {
                 <h2>📌 Kubernetes Info</h2>
                 <p><span class="label">Pod:</span> <span class="value">${hostname}</span></p>
                 <p><span class="label">Namespace:</span> <span class="value">${namespace}</span></p>
-                <p><span class="label">Node:</span> <span class="value">${node}</span></p>
             </div>
 
             <div class="section">
