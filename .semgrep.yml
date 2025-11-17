@@ -1,5 +1,0 @@
-config:
-  - auto
-
-exclude:
-  - id: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
